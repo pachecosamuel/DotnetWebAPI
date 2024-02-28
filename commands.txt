@@ -8,10 +8,15 @@
   "AllowedHosts": "*",
   
   "ApplicationName": "Products",
+  
+  "Database": {
+    "Connection": "server1",
+    "Port": 1010
+  },
 
   "Products": [
-    {"Code": "1", "Nome": "HD", "Price": 10},
-    {"Code": "2", "Nome": "Memória", "Price": 10},
-    {"Code": "3", "Nome": "NVME", "Price": 10}
+    {"Code": "1", "Name": "HD"},
+    {"Code": "2", "Name": "Memória"},
+    {"Code": "3", "Name": "NVME"}
   ]
 }

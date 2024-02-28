@@ -1,6 +1,9 @@
+using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+var cfg = builder.Configuration;
+ProductRepository.InitMyCfg(cfg);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -10,7 +13,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -45,7 +48,7 @@ app.MapGet("products/{code}", ([FromRoute] string code) =>
 {
     var product = ProductRepository.GetBy(code);
 
-    if(product is Product)
+    if (product is Product)
         return Results.Ok(product);
 
     return Results.BadRequest();
@@ -63,22 +66,34 @@ app.MapPut("/products", (Product product) =>
     return Results.Ok();
 });
 
-app.MapDelete("/products", (string code) => {
+app.MapDelete("/products", (string code) =>
+{
     ProductRepository.DeleteProductById(code);
     return Results.Ok();
 });
+
+if (app.Environment.IsDevelopment())
+    app.MapGet("configuration", (IConfiguration cfg) =>
+    {
+        return Results.Ok($"Cfg connection: {cfg["Database:Connection"]} - Cfg port: {cfg["database:port"]}");
+    });
 
 app.Run();
 
 public static class ProductRepository
 {
-    public static List<Product> Products { get; set; }
+    public static List<Product> Products { get; set; } = [];
+
+    public static void InitMyCfg(IConfiguration cfg)
+    {
+        var products = cfg.GetSection("Products").Get<List<Product>>();
+        
+        if (products is not null)
+            Products = products;
+    }     
 
     public static void AddProduct(Product product)
     {
-        if (Products == null)
-            Products = [];
-
         Products.Add(product);
     }
 
