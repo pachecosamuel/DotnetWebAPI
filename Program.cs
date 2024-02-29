@@ -1,7 +1,11 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApplicationDbContext>();
+
 var cfg = builder.Configuration;
 ProductRepository.InitMyCfg(cfg);
 
@@ -115,9 +119,26 @@ public static class ProductRepository
     }
 }
 
-public class Product
-{
+public class Product{
+    public int Id { get; set; }
     public string Code { get; set; }
     public string Nome { get; set; }
     public float Price { get; set; }
+
+    public string Description { get; set; }
+}
+
+public class ApplicationDbContext : DbContext
+{
+
+    public DbSet<Product> Products { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Substitua 'NomeDoBancoDeDados' pelo nome do seu banco de dados
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Products;Username=postgres;Password=p0stgr3s");
+        }
+    }
 }
